@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Connect-4 PopOut</title>
+<script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
+<script src="src/gui.js"></script>
+<script src="src/bitboard.js"></script>
+<script src="src/transtable.js"></script>
+<script src="src/engine.js"></script>
+<style>
+#content {
+	text-align: center;
+}
+
+#game {
+-webkit-user-select: none; /* webkit (safari, chrome) browsers */
+-moz-user-select: none; /* mozilla browsers */
+-khtml-user-select: none; /* webkit (konqueror) browsers */
+-ms-user-select: none; /* IE10+ */
+}
+
+#help {
+    margin-top: 25px;
+}
+</style>
+</head>
+<body>
+<div id="content">
+<div id="game">
+<canvas oncontextmenu="javascript:return false;" id="c4_canvas" width="480" height="420"></canvas>
+</div>
+<div>
+<button type="button" id="restart_button">Reset</button>
+</div>
+<div id="help">
+Drop with left mouse button and pop with right mouse button.
+</div>
+</div>
+<script>
+
+var canvas = $("#c4_canvas")[0];
+var board = new Connect4();
+var originalVariation;
+var solving = false;
+var worker;
+var startScreen = true;
+
+board.setCanvas(canvas);
+
+board.onLeftClick = function(x) {
+	if(startScreen) {
+		gameStarted();
+	} else if(board.getMoveNumber() % 2 == 1 && !solving && !board.won) {
+		board.drop(x);
+		board.drawBoard();
+		computerPlay();
+	}
+}
+board.onRightClick = function(x) {
+	if(startScreen) {
+		gameStarted();
+	} else if(board.getMoveNumber() % 2 == 1 && !solving && !board.won) {
+		board.pop(x);
+		board.drawBoard();
+		computerPlay();
+	}
+}
+
+function drawStartScreen() {
+	startScreen = true;
+	board.reset();
+	board.drawBoard();
+	var ctx = board.context;
+	ctx.font = "italic 50px Verdana";
+	ctx.fillStyle = "#00bb00";
+	var text = "Click here to play";
+	var textWidth = ctx.measureText(text).width;
+	ctx.fillText(text, (canvas.width - textWidth)/2, canvas.height*1.1/2);
+}
+
+function gameStarted() {
+	if(!worker) initWorker();
+	board.reset();
+	board.drawBoard();
+	startScreen = false;
+	updateMovesLeft();
+	computerPlay();
+}
+
+function computerPlay() {
+	setSolving(true);
+	originalVariation = board.variation;
+	worker.postMessage({variation: board.variation, mode: "computer"});
+}
+
+function updateMovesLeft() {
+	var str;
+	if(board.hasWon) {
+		str = "Game has ended";
+	} else {
+		var ply = board.getMoveNumber();
+		
+		str = "Computer needs " + (ply % 2 == 0 ? 11 - ply / 2 : 11 - (ply + 1)/2) + " disks or fewer to win";
+	}
+	$("#moves_left").text(str);
+}
+
+function initWorker() {
+	if(worker) worker.terminate();
+	worker = new Worker("src/searchworker.js");
+	worker.onmessage = function(e) {
+		if(e.data.finished) {
+			setSolving(false);
+			board.setVariation(originalVariation);
+			if(e.data.move) {
+				board.play(e.data.move);
+			}
+			board.drawBoard();
+			updateMovesLeft();
+		} else {
+			board.setVariation(e.data.text);
+			board.drawBoard();
+			var ctx = board.context;
+			ctx.font = "italic 50px Verdana";
+			ctx.fillStyle = "#00bb00";
+			var text = "Solving";
+			var textWidth = ctx.measureText(text).width;
+			ctx.fillText(text, (canvas.width - textWidth)/2, canvas.height*1.1/2);
+		}
+	}
+}
+
+function setSolving(on) {
+	solving = on;
+	$("#restart_button").text(on?"Cancel":"Restart");
+}
+
+$("#restart_button").click(function(e) {
+	if(!solving) {
+		gameStarted();
+	} else {
+		initWorker();
+		setSolving(false);
+		drawStartScreen();	
+	}
+});
+
+drawStartScreen();
+
+</script>
+</body>
+</html>
