@@ -1,3 +1,6 @@
+import Bitboard from "./bitboard";
+import TransTable from "./transtable";
+
 //scores used and returned by GameEngine
 const UNKNOWN = 0;
 const WIN = 1;
