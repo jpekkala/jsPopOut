@@ -150,6 +150,7 @@ Connect4.prototype.checkWin = function () {
     //check the line that starts at (x,y) and whose displacement is (xd,yd)
     function checkLine(p, x, y, xd, yd) {
         var count = 0;
+        var last = 0
         for (; (x >= 0 && x < outer.boardWidth) && (y >= 0 && y < outer.boardHeight); x += xd, y += yd) {
             var v = outer.getCell(x, y);
             if (v != p) {
