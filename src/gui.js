@@ -1,7 +1,7 @@
 /**
  * A simple Connect-4 GUI as an HTML canvas.
  */
-function Connect4(width, height) {
+export default function Connect4(width, height) {
     this.boardWidth = typeof width !== 'undefined' ? width : 7;
     this.boardHeight = typeof height !== 'undefined' ? height : 6;
 

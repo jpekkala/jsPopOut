@@ -11,7 +11,7 @@
  * two-valued logic. The number of bits for the key depends on the
  * transposition table size. The remaining bits are reserved for the work.
  */
-function TransTable(size) {
+export default function TransTable(size) {
     //the size should be a prime because it is used as the hash function
     this.transSize = typeof size !== 'undefined' ? size : 2097169;
 

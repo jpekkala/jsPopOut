@@ -16,7 +16,7 @@
  * other half is mirrored). The last four bits which do not map to any column
  * are always unset.
  */
-function Bitboard() {
+export default function Bitboard() {
     this.reset();
 }
 

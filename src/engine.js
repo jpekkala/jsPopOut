@@ -1,7 +1,7 @@
 //scores used and returned by GameEngine
-UNKNOWN = 0;
-WIN = 1;
-LOSS = -1;
+const UNKNOWN = 0;
+const WIN = 1;
+const LOSS = -1;
 
 /**
  * Performs two-valued negamax with shallow pruning. The history heuristic is
@@ -15,7 +15,7 @@ LOSS = -1;
  * if he made a non-winning pop move or if the game was allowed to last longer
  * than 21 plies.
  */
-function GameEngine() {
+export default function GameEngine() {
     Bitboard.call(this);
     this.transTable = new TransTable();
     this.history = new Array(7 * 6);
