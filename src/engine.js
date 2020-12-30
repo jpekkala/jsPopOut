@@ -1,11 +1,11 @@
-import Bitboard from "./bitboard";
-import TransTable from "./transtable";
+import Bitboard from "./bitboard.js";
+import TransTable from "./transtable.js";
 
 import {
     UNKNOWN,
     WIN,
     LOSS,
-} from './constants';
+} from './constants.js';
 
 /**
  * Performs two-valued negamax with shallow pruning. The history heuristic is

@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "verify": "mocha --reporter=nyan verify/*.js"
   },
   "repository": {
     "type": "git",
