@@ -1,0 +1,22 @@
+{
+  "name": "jspopout",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jpekkala/jsPopOut.git"
+  },
+  "keywords": [
+    "connect-4",
+    "popout"
+  ],
+  "author": "Jukka Pekkala",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jpekkala/jsPopOut/issues"
+  },
+  "homepage": "https://github.com/jpekkala/jsPopOut#readme"
+}
