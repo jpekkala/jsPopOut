@@ -1,10 +1,11 @@
 import Bitboard from "./bitboard";
 import TransTable from "./transtable";
 
-//scores used and returned by GameEngine
-const UNKNOWN = 0;
-const WIN = 1;
-const LOSS = -1;
+import {
+    UNKNOWN,
+    WIN,
+    LOSS,
+} from './constants';
 
 /**
  * Performs two-valued negamax with shallow pruning. The history heuristic is

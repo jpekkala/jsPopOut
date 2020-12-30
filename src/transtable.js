@@ -1,3 +1,11 @@
+import { UNKNOWN } from './constants.js';
+
+// The number of bits needed to encode a position
+const POSITION_BITS = 49;
+
+// The number of bits needed to encode a score
+const SCORE_BITS = 2;
+
 /**
  * Stores the score of a position in a two-level hash table. For each
  * entry in the table, the key of the position, the score and the work
@@ -16,9 +24,9 @@ export default function TransTable(size) {
     this.transSize = typeof size !== 'undefined' ? size : 2097169;
 
     //a position uses 49 bits, calculate how many bits the key needs
-    this.keyBits = 49 - Math.floor(Math.log(this.transSize) / Math.log(2));
-    //calculating the mask fails if key is 31 bits or more
-    if (this.keyBits > 30) throw new Error("Transposition table size is too small");
+    this.keyBits = POSITION_BITS - Math.floor(Math.log(this.transSize) / Math.log(2));
+    //both the key and the score must fit in 32 bits because bit shift keeps only the first 32 bits
+    if (this.keyBits + SCORE_BITS > 32) throw new Error("Transposition table size is too small");
     this.scoreOffset = 1 << this.keyBits;
     this.keyMask = this.scoreOffset - 1;
     this.maxWork = Math.pow(2, 52 - 1 - this.keyBits) - 1;
@@ -81,6 +89,6 @@ TransTable.prototype.fetch = function (pos) {
         return whiteWins ? 1 : -1;
     }
 
-    return 0;
+    return UNKNOWN;
 }
 
