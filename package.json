@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
+    "lint": "eslint src",
     "test": "mocha",
     "verify": "mocha --reporter=nyan verify/*.js"
   },
@@ -25,6 +26,7 @@
   },
   "devDependencies": {
     "chai": "^4.2.0",
+    "eslint": "^7.16.0",
     "mocha": "^8.2.1"
   }
 }
