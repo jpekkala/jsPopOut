@@ -3,5 +3,8 @@ parserOptions:
   sourceType: module
 env:
   es2020: true
+  mocha: true
 extends:
   - eslint:recommended
+rules:
+  no-var: error

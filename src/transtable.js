@@ -1,4 +1,8 @@
-import { UNKNOWN } from './constants.js';
+import {
+    UNKNOWN,
+    WIN,
+    LOSS,
+} from './constants.js';
 
 // The number of bits needed to encode a position
 const POSITION_BITS = 49;
@@ -19,9 +23,12 @@ const SCORE_BITS = 2;
  * two-valued logic. The number of bits for the key depends on the
  * transposition table size. The remaining bits are reserved for the work.
  */
-export default function TransTable(size) {
+export default function TransTable(size = 2097169) {
+    if (typeof size !== 'number') {
+        throw new Error('Invalid table size');
+    }
     //the size should be a prime because it is used as the hash function
-    this.transSize = typeof size !== 'undefined' ? size : 2097169;
+    this.transSize = size;
 
     //a position uses 49 bits, calculate how many bits the key needs
     this.keyBits = POSITION_BITS - Math.floor(Math.log(this.transSize) / Math.log(2));
@@ -45,19 +52,19 @@ TransTable.prototype.store = function (pos, score, nodes) {
     }
 
     //there are two entries per transposition slot
-    var index = (pos % this.transSize) * 2;
+    const index = (pos % this.transSize) * 2;
     //Javascript does not have integer division
-    var key = Math.floor(pos / this.transSize);
+    const key = Math.floor(pos / this.transSize);
 
     //combine score and work
-    var scoreWork = 2 * nodes;
+    let scoreWork = 2 * nodes;
     if (score === 1) scoreWork += 1;
 
     //multiplying by this.scoreOffset is the same as shifting (exceeds 32 bits here)
-    var entry = scoreWork * this.scoreOffset + key;
+    const entry = scoreWork * this.scoreOffset + key;
 
     //determine if the new position has the biggest work
-    var first = this.table[index];
+    const first = this.table[index];
     if (!first || entry > first) {
         //store as the first entry and move the old one to second place
         this.table[index] = entry;
@@ -69,24 +76,24 @@ TransTable.prototype.store = function (pos, score, nodes) {
 }
 
 TransTable.prototype.fetch = function (pos) {
-    var index = (pos % this.transSize) * 2;
-    var key = Math.floor(pos / this.transSize);
+    const index = (pos % this.transSize) * 2;
+    const key = Math.floor(pos / this.transSize);
 
     //check the first entry
-    var entry = this.table[index];
-    if (!entry) return 0;
-    if ((entry & this.keyMask) === key) {
+    const expensiveEntry = this.table[index];
+    if (!expensiveEntry) return 0;
+    if ((expensiveEntry & this.keyMask) === key) {
         //the score is in the first 32 bits so shifting is safe
-        var whiteWins = (entry >>> this.keyBits & 1) == 1;
-        return whiteWins ? 1 : -1;
+        const whiteWins = (expensiveEntry >>> this.keyBits & 1) == 1;
+        return whiteWins ? WIN : LOSS;
     }
 
     //check the second entry
-    entry = this.table[index + 1];
-    if (!entry) return 0;
-    if ((entry & this.keyMask) === key) {
-        var whiteWins = (entry >>> this.keyBits & 1) == 1;
-        return whiteWins ? 1 : -1;
+    const recentEntry = this.table[index + 1];
+    if (!recentEntry) return 0;
+    if ((recentEntry & this.keyMask) === key) {
+        const whiteWins = (recentEntry >>> this.keyBits & 1) == 1;
+        return whiteWins ? WIN : LOSS;
     }
 
     return UNKNOWN;

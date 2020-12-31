@@ -48,13 +48,13 @@ GameEngine.prototype.solve = function () {
  * Returns a winning move or false if no such move could be found
  */
 GameEngine.prototype.getBestMove = function () {
-    var symmetric = this.getPositionCode() == this.getMirrorPositionCode();
-    var succ = this.getSuccessors(symmetric);
-    var best;
+    const symmetric = this.getPositionCode() == this.getMirrorPositionCode();
+    const succ = this.getSuccessors(symmetric);
+    let best;
     //check if there is an immediate win
-    var quickScore = this.fastEvaluate(succ);
+    const quickScore = this.fastEvaluate(succ);
     if (quickScore == WIN) {
-        for (var i = 0; i < succ.length; i++) {
+        for (let i = 0; i < succ.length; i++) {
             if (succ[i].score == WIN) {
                 best = succ[i];
                 break;
@@ -62,16 +62,16 @@ GameEngine.prototype.getBestMove = function () {
         }
     } else {
         //no immediate win, call negamax
-        var oldVariation = this.variation;
+        const oldVariation = this.variation;
         this.resetHistory();
         this.orderMoves(succ);
-        for (var i = 0; i < succ.length; i++) {
-            var s = succ[i];
+        for (let i = 0; i < succ.length; i++) {
+            const s = succ[i];
             if (s.score != UNKNOWN) continue;
             if (s.pop) this.pop(s.column);
             else this.drop(s.column);
 
-            var r = this.solve();
+            const r = this.solve();
             this.setVariation(oldVariation);
             if (r == LOSS) {
                 best = s;
@@ -94,22 +94,20 @@ GameEngine.prototype.getBestMove = function () {
  * symmetric and moves in the last three columns are skipped.
  */
 GameEngine.prototype.getSuccessors = function (symmetric) {
-    var p = this.ply & 1;
+    const columnLimit = symmetric ? 4 : 7;
+    const successors = [];
 
-    var columnLimit = symmetric ? 4 : 7;
-    var successors = [];
-
-    for (var x = 0; x < columnLimit; x++) {
+    for (let x = 0; x < columnLimit; x++) {
         if (this.canDrop(x)) {
-            var s = {boards: this.getDropBoards(x), pop: false, column: x, score: UNKNOWN};
+            const s = {boards: this.getDropBoards(x), pop: false, column: x, score: UNKNOWN};
             successors.push(s);
         }
     }
 
     //do in a second loop so that pop moves come last
-    for (var x = 0; x < columnLimit; x++) {
+    for (let x = 0; x < columnLimit; x++) {
         if (this.canPop(x)) {
-            var s = {boards: this.getPopBoards(x), pop: true, column: x, score: UNKNOWN};
+            const s = {boards: this.getPopBoards(x), pop: true, column: x, score: UNKNOWN};
             successors.push(s);
         }
     }
@@ -123,10 +121,10 @@ GameEngine.prototype.getSuccessors = function (symmetric) {
  * LOSS.
  */
 GameEngine.prototype.fastEvaluate = function (successors) {
-    var current = this.ply & 1;
-    var other = current ^ 1;
-    for (var i = 0; i < successors.length; i++) {
-        var s = successors[i];
+    const current = this.ply & 1;
+    const other = current ^ 1;
+    for (let i = 0; i < successors.length; i++) {
+        const s = successors[i];
         if (this.hasWon(s.boards[current])) {
             s.score = WIN;
             return WIN;
@@ -145,9 +143,9 @@ GameEngine.prototype.fastEvaluate = function (successors) {
  */
 GameEngine.prototype.resetHistory = function () {
     //give middle cells a slightly better initial score
-    for (var x = 0; x < 7; x++) {
-        var v = Math.min(x, 6 - x);
-        for (var y = 0; y < 6; y++) {
+    for (let x = 0; x < 7; x++) {
+        const v = Math.min(x, 6 - x);
+        for (let y = 0; y < 6; y++) {
             this.history[x * 6 + y] = v;
         }
     }
@@ -175,19 +173,19 @@ GameEngine.prototype.increaseHistoryScore = function (x) {
  * order is unlikely to matter.
  */
 GameEngine.prototype.orderMoves = function (succ) {
-    for (var i = 1; i < succ.length; i++) {
+    for (let i = 1; i < succ.length; i++) {
         //pop moves should come after drop moves and they do not need to be ordered
         if (succ[i].pop) break;
 
         //insertion sort based on history score
-        var j = i;
+        let j = i;
         while (j > 0) {
-            var a = this.getHistoryScore(succ[j].column);
-            var b = this.getHistoryScore(succ[j - 1].column);
+            const a = this.getHistoryScore(succ[j].column);
+            const b = this.getHistoryScore(succ[j - 1].column);
 
             if (a > b) {
                 //swap
-                var t = succ[j];
+                const t = succ[j];
                 succ[j] = succ[j - 1];
                 succ[j - 1] = t;
                 j--;
@@ -216,34 +214,34 @@ GameEngine.prototype.negamax = function () {
     }
 
     //find the position code and check for symmetry
-    var pos = this.getPositionCode();
-    var mirrorPos = this.getMirrorPositionCode();
-    var symmetrical = false;
+    let pos = this.getPositionCode();
+    const mirrorPos = this.getMirrorPositionCode();
+    let symmetrical = false;
     if (pos === mirrorPos) {
         pos = pos < mirrorPos ? pos : mirrorPos;
         symmetrical = true;
     }
 
     //check if we have already solved the position
-    var transScore = this.transTable.fetch(pos);
+    const transScore = this.transTable.fetch(pos);
     if (transScore != UNKNOWN) return transScore;
 
     //get successor states and check for an immediate win
-    var successors = this.getSuccessors(symmetrical);
-    var bestScore = this.fastEvaluate(successors);
+    const successors = this.getSuccessors(symmetrical);
+    let bestScore = this.fastEvaluate(successors);
     if (bestScore == WIN) return WIN;
 
     //order moves with the history heuristic
     this.orderMoves(successors);
 
     //save the current state
-    var startNodes = this.interiorCount;
-    var oldVariation = this.variation;
-    var oldBoards = this.boards;
+    const startNodes = this.interiorCount;
+    const oldVariation = this.variation;
+    const oldBoards = this.boards;
 
     this.ply++;
-    for (var i = 0; i < successors.length; i++) {
-        var s = successors[i];
+    for (let i = 0; i < successors.length; i++) {
+        const s = successors[i];
         //if the score is not UNKNOWN, it is a terminal state
         if (s.score != UNKNOWN) continue;
 
@@ -258,7 +256,7 @@ GameEngine.prototype.negamax = function () {
         }
 
         //recursive call, note the minus sign
-        var newScore = -this.negamax();
+        const newScore = -this.negamax();
 
         //return to the previous state
         if (s.pop) {

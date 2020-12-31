@@ -42,12 +42,12 @@ Bitboard.prototype.hasRedWon = function() {
 
 Bitboard.prototype.hasWon = function (board) {
     //it does not matter which way the two halves are assigned
-    var half1 = board.left;
-    var half2 = board.right;
+    const half1 = board.left;
+    const half2 = board.right;
 
     //check vertical which is easy
-    var vertical1 = half1 & half1 << 1;
-    var vertical2 = half2 & half2 << 1;
+    const vertical1 = half1 & half1 << 1;
+    const vertical2 = half2 & half2 << 1;
     if ((vertical1 & vertical1 << 2) != 0) return true;
     if ((vertical2 & vertical2 << 2) != 0) return true;
 
@@ -65,8 +65,8 @@ Bitboard.prototype.checkHorizontal = function (half1, half2) {
     half2 &= half2 >>> 7;
 
     //only the 6 first bits can be set and they are the pairs containing the middle column
-    var middle1 = half1 >>> 14;
-    var middle2 = half2 >>> 14;
+    const middle1 = half1 >>> 14;
+    const middle2 = half2 >>> 14;
 
     //check for a win in columns a-d and d-g
     if ((half1 & middle1) != 0) return true;
@@ -105,9 +105,9 @@ Bitboard.prototype.checkDiagonal = function (half1, half2) {
  * type without a loss of information (see double-precision IEEE-754)
  */
 Bitboard.prototype.getPositionCode = function () {
-    var n = 0x10000000; // == 2**28
+    let n = 0x10000000; // == 2**28
     //the mask removes the middle column so that it is not added twice
-    var mask = 0x1fffff; // == 2**21 - 1
+    const mask = 0x1fffff; // == 2**21 - 1
     //add White's board twice and Red's board once
     n *= 2 * (this.boards[0].right & mask) + (this.boards[1].right & mask);
     n += 2 * this.boards[0].left + this.boards[1].left;
@@ -119,8 +119,8 @@ Bitboard.prototype.getPositionCode = function () {
  * position code and the mirror position code are the same, the position is symmetrical.
  */
 Bitboard.prototype.getMirrorPositionCode = function () {
-    var n = 0x10000000; // == 2**28
-    var mask = 0x1fffff; // == 2**21 - 1
+    let n = 0x10000000; // == 2**28
+    const mask = 0x1fffff; // == 2**21 - 1
     n *= 2 * (this.boards[0].left & mask) + (this.boards[1].left & mask);
     n += 2 * this.boards[0].right + this.boards[1].right;
     return n;
@@ -158,10 +158,10 @@ Bitboard.prototype.getCurrentBoards = function () {
  * Returns the new state that would result if the current player made a drop move
  */
 Bitboard.prototype.getDropBoards = function (x) {
-    var newBoards = this.getCurrentBoards();
+    const newBoards = this.getCurrentBoards();
 
-    var h = this.heights[x];
-    var current = this.ply & 1;
+    const h = this.heights[x];
+    const current = this.ply & 1;
 
     if (x <= 3) {
         newBoards[current].left |= 1 << x * 7 + h;
@@ -178,15 +178,15 @@ Bitboard.prototype.getDropBoards = function (x) {
  * Returns the new state that would result if the current player made a pop move
  */
 Bitboard.prototype.getPopBoards = function (x) {
-    var newBoards = this.getCurrentBoards();
+    const newBoards = this.getCurrentBoards();
 
     if (x <= 3) {
         //remove piece
         newBoards[this.ply & 1].left ^= 1 << x * 7;
 
         //shift down column
-        var mask = 127 << x * 7;
-        var complement = ~mask;
+        const mask = 127 << x * 7;
+        const complement = ~mask;
         newBoards[0].left = (newBoards[0].left & complement) | (newBoards[0].left & mask) >>> 1;
         newBoards[1].left = (newBoards[1].left & complement) | (newBoards[1].left & mask) >>> 1;
     }
@@ -196,8 +196,8 @@ Bitboard.prototype.getPopBoards = function (x) {
         newBoards[this.ply & 1].right ^= 1 << (6 - x) * 7;
 
         //shift down column
-        var mask = 127 << (6 - x) * 7;
-        var complement = ~mask;
+        const mask = 127 << (6 - x) * 7;
+        const complement = ~mask;
         newBoards[0].right = (newBoards[0].right & complement) | (newBoards[0].right & mask) >>> 1;
         newBoards[1].right = (newBoards[1].right & complement) | (newBoards[1].right & mask) >>> 1;
     }
@@ -231,8 +231,8 @@ Bitboard.prototype.pop = function (x) {
 
 Bitboard.prototype.setVariation = function (variation) {
     this.reset();
-    for (var i = 0; i < variation.length; i++) {
-        var code = variation.charCodeAt(i);
+    for (let i = 0; i < variation.length; i++) {
+        const code = variation.charCodeAt(i);
         if (code >= 97 && code < 97 + 7) {
             if (!this.drop(code - 97)) return false;
         } else if (code >= 65 && code < 65 + 7) {
@@ -268,9 +268,9 @@ Bitboard.prototype.getDiscAt = function(x, y) {
  * Convert the bitboards into a human-readable string
  */
 Bitboard.prototype.toString = function() {
-    var str = "";
-    for (var y = 5; y >= 0; y--) {
-        for (var x = 0; x < 7; x++) {
+    let str = "";
+    for (let y = 5; y >= 0; y--) {
+        for (let x = 0; x < 7; x++) {
             const disc = this.getDiscAt(x, y);
             if (disc === 1) {
                 str += 'X';
