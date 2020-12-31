@@ -32,6 +32,13 @@ Bitboard.prototype.reset = function () {
     this.variation = "";
 }
 
+Bitboard.prototype.hasWhiteWon = function() {
+    return this.hasWon(this.boards[0]);
+}
+
+Bitboard.prototype.hasRedWon = function() {
+    return this.hasWon(this.boards[1]);
+}
 
 Bitboard.prototype.hasWon = function (board) {
     //it does not matter which way the two halves are assigned
@@ -237,45 +244,41 @@ Bitboard.prototype.setVariation = function (variation) {
     return true;
 }
 
-/**
- * Convert the bitboards into a human-readable string
- */
-Bitboard.prototype.toString = function () {
-    var str = "";
-    for (var y = 5; y >= 0; y--) {
-        for (var x = 0; x < 7; x++) {
-            var bit, p1, p2;
+Bitboard.prototype.getDiscAt = function(x, y) {
+    let bit;
+    let p1;
+    let p2;
 
-            if (x < 4) {
-                bit = 1 << x * 7 + y;
-                p1 = this.boards[0].left;
-                p2 = this.boards[1].left;
-            } else {
-                bit = 1 << (6 - x) * 7 + y;
-                p1 = this.boards[0].right;
-                p2 = this.boards[1].right;
-            }
-
-            if ((p1 & bit) != 0) str += "X";
-            else if ((p2 & bit) != 0) str += "O";
-            else str += ".";
-        }
-        str += "\n";
+    if (x < 4) {
+        bit = 1 << x * 7 + y;
+        p1 = this.boards[0].left;
+        p2 = this.boards[1].left;
+    } else {
+        bit = 1 << (6 - x) * 7 + y;
+        p1 = this.boards[0].right;
+        p2 = this.boards[1].right;
     }
-    return str;
+
+    if (p1 & bit) return 1;
+    if (p2 & bit) return 2;
+    return 0;
 }
 
 /**
- * 32-bit bitboard to a string, for debugging purposes
+ * Convert the bitboards into a human-readable string
  */
-Bitboard.toString = function (board) {
+Bitboard.prototype.toString = function() {
     var str = "";
-    for (var y = 6; y >= 0; y--) {
-        for (var x = 0; x < 5; x++) {
-            if (x == 4 && y >= 4) continue;
-            var bit = 1 << x * 7 + y;
-            if ((board & bit) != 0) str += "1";
-            else str += "0";
+    for (var y = 5; y >= 0; y--) {
+        for (var x = 0; x < 7; x++) {
+            const disc = this.getDiscAt(x, y);
+            if (disc === 1) {
+                str += 'X';
+            } else if (disc === 2) {
+                str += 'O';
+            } else {
+                str += '.';
+            }
         }
         str += "\n";
     }
